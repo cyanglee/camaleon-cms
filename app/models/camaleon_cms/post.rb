@@ -40,7 +40,7 @@ class CamaleonCms::Post < CamaleonCms::PostDefault
   has_many :drafts, ->{where(status: 'draft')}, class_name: "CamaleonCms::Post", foreign_key: :post_parent, dependent: :destroy
   has_many :children, class_name: "CamaleonCms::Post", foreign_key: :post_parent, dependent: :destroy, primary_key: :id
 
-  belongs_to :owner, class_name: "CamaleonCms::User", foreign_key: :user_id
+  belongs_to :owner, class_name: PluginRoutes.static_system_info['user_model'].presence || 'CamaleonCms::User', foreign_key: :user_id
   belongs_to :parent, class_name: "CamaleonCms::Post", foreign_key: :post_parent
   belongs_to :post_type, class_name: "CamaleonCms::PostType", foreign_key: :taxonomy_id, inverse_of: :posts
 
@@ -55,7 +55,6 @@ class CamaleonCms::Post < CamaleonCms::PostDefault
   scope :drafts, -> {where(status: 'draft')}
   scope :pendings, -> {where(status: 'pending')}
   scope :latest, -> {reorder(created_at: :desc)}
-  scope :featured, -> {where(is_feature: true)}
 
   validates_with CamaleonCms::PostUniqValidator
   attr_accessor :show_title_with_parent
@@ -111,42 +110,36 @@ class CamaleonCms::Post < CamaleonCms::PostDefault
   # check if current post can manage content
   # return boolean
   def manage_content?(posttype = nil)
-    get_option('has_content', (posttype || self.post_type).get_option('has_content', true))
+    get_option('has_content', (posttype || post_type).get_option('has_content', true))
   end
 
   # return boolean
   def manage_layout?(posttype = nil)
-    get_option('has_layout', (posttype || self.post_type).get_option('has_layout', false))
+    get_option('has_layout', (posttype || post_type).get_option('has_layout', false))
   end
 
   # check if current post can manage template
   # return boolean
   def manage_template?(posttype = nil)
-    get_option('has_template', (posttype || self.post_type).get_option('has_template', true))
+    get_option('has_template', (posttype || post_type).get_option('has_template', true))
   end
 
   # check if current post can manage summary
   # return boolean
   def manage_summary?(posttype = nil)
-    get_option('has_summary', (posttype || self.post_type).get_option('has_summary', true))
-  end
-
-  # check if current post can manage keywords
-  # return boolean
-  def manage_keywords?(posttype = nil)
-    get_option('has_keywords', (posttype || self.post_type).get_option('has_keywords', true))
+    get_option('has_summary', (posttype || post_type).get_option('has_summary', true))
   end
 
   # check if current post can manage picture
   # return boolean
   def manage_picture?(posttype = nil)
-    get_option('has_picture', (posttype || self.post_type).get_option('has_picture', true))
+    get_option('has_picture', (posttype || post_type).get_option('has_picture', true))
   end
 
   # check if current post can manage comments
   # return boolean
   def manage_comments?(posttype = nil)
-    get_option('has_comments', (posttype || self.post_type).get_option('has_comments', false))
+    get_option('has_comments', (posttype || post_type).get_option('has_comments', false))
   end
 
   # check if the post can be commented
@@ -156,11 +149,16 @@ class CamaleonCms::Post < CamaleonCms::PostDefault
     manage_comments? && get_meta('has_comments').to_s == "1"
   end
 
+  # check if is required picture for current post
+  def is_required_picture?
+    post_type.get_option('is_required_picture', false)
+  end
+
   # define post configuration for current post
   # possible key values (String):
   #   has_content, boolean (default true)
   #   has_summary, boolean (default true)
-  #   has_keywords, boolean (default true)
+  #   has_seo, boolean (default true)
   #   has_picture, boolean (default true)
   #   has_template, boolean (default false)
   #   has_comments, boolean (default false)
@@ -192,6 +190,14 @@ class CamaleonCms::Post < CamaleonCms::PostDefault
   def set_summary(summary)
     set_meta("summary", summary)
   end
+
+  # check if current post permit manage seo attrs
+  # has_keywords: used until next version (deprecated to use has_seo)
+  # return boolean
+  def manage_seo?(posttype = nil)
+    get_option('has_seo', get_option('has_keywords', false)) || (posttype || post_type).manage_seo?
+  end
+  alias_method :manage_keywords?, :manage_seo? # method name deprecated to use manage_seo?
 
   # save the thumbnail url for current post
   # thumb_url: String url

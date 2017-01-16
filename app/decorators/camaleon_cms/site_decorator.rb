@@ -133,7 +133,7 @@ class CamaleonCms::SiteDecorator < CamaleonCms::TermTaxonomyDecorator
   # return the role_id of current visitor for this site
   # if the visitor was not logged in, then return -1
   def visitor_role
-    h.signin? ? h.cama_current_user.get_role(object).slug : "-1"
+    h.signin? ? h.cama_current_user.role : '-1'
   end
 
   # check if plugin_key is already installed for this site
@@ -148,6 +148,7 @@ class CamaleonCms::SiteDecorator < CamaleonCms::TermTaxonomyDecorator
   def the_url(*args)
     args = args.extract_options!
     args[:site] = self
+    args[:host], args[:port] = object.get_domain.to_s.split(':') if !args[:as_path] && (h.current_site rescue false) != self # fix for different site of current visited site
     h.cama_current_site_host_port(args) unless args[:as_path]
     args[:locale] = @_deco_locale unless args.include?(:locale)
     postfix = 'url'
