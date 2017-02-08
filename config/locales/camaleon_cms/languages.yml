@@ -24,6 +24,8 @@ en:
     it: "Italian"
     ru: "Russian"
     nl: "Dutch"
+    ja: "日本語"    
+    zh-TW: "中文"
 
 es:
   languages:
@@ -116,4 +118,21 @@ zh-CN:
     ru: "俄语"
     nl: "荷兰语"
 
+zh-TW:
+  languages: 
+    es: "西班牙語"
+    en: "英語"
+    fr: "法語"
+    zh-CN: "中文"
+    de: "德語"
+    pt: "葡萄牙語"
+    pt-BR: "巴西"
+    it: "義大利語"
+    ru: "俄語"
+    nl: "荷蘭語"
 
+ja:
+  languages:
+    en: "English"
+    ja: "日本語"    
+    zh-TW: "中文"
