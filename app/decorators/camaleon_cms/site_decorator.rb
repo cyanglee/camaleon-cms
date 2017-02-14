@@ -125,7 +125,7 @@ class CamaleonCms::SiteDecorator < CamaleonCms::TermTaxonomyDecorator
         lang_to_display = lang.to_s
       end
 
-      res << "<li class='#{ current_class if I18n.locale.to_s == lang.to_s}'> <a href='#{h.cama_url_to_fixed(current_page ? "url_for" : "cama_root_url", {locale: lang, cama_set_language: lang})}'>#{I18n.available_locales.map{ |locale| [I18n.t('languages', locale: lang.to_s), locale.to_s]}}</a> </li>"
+      res << "<li class='#{ current_class if I18n.locale.to_s == lang.to_s}'> <a href='#{h.cama_url_to_fixed(current_page ? "url_for" : "cama_root_url", {locale: lang, cama_set_language: lang})}'>#{I18n.t("languages.#{lang.to_s}")}</a> </li>"
     end
     res << "</ul>"
     res.join("")
