@@ -11,47 +11,53 @@ module CamaleonCms::Frontend::NavMenuHelper
   # default configurations is for bootstrap support
   def draw_menu(args = {})
     args_def = {
-                menu_slug:        'main_menu', #slug for the menu
-                container:        'ul', #type of container for the menu
-                container_id:     '', #container id for the menu
-                container_class:  'nav navbar-nav nav-menu', #container class for the menu
-                item_container:   'li', #type of container for the items
-                item_current:     'current-menu-item', #class for current menu item
-                item_class:       'menu-item', # class for all menu items
-                item_class_parent:"dropdown", # class for all menu items that contain sub items
-                sub_container:    'ul', #type of container for sub items
-                sub_class:        'dropdown-menu', # class for sub container
-                callback_item:    lambda{|args| },
-                    # callback executed for each item (args = { menu_item, link, level, settings, has_children, link_attrs = "", index}).
-                    #     menu_item: (Object) Menu object
-                    #     link: (Hash) link data: {link: '', name: ''}
-                    #     level: (Integer) current level
-                    #     has_children: (boolean) if this item contain sub menus
-                    #     settings: (Hash) menu settings
-                    #     index: (Integer) Index Position of this menu
-                    #     link_attrs: (String) Here you can add your custom attrs for current link, sample: id='my_id' data-title='#{args[:link][:name]}'
-                    #     item_container_attrs: (String) Here you can add your custom attrs for link container.
-                    # In settings you can change the values for this item, like after, before, ..:
-                    # sample: lambda{|args| args[:settings][:after] = "<span class='caret'></span>" if args[:has_children]; args[:link_attrs] = "id='#{menu_item.id}'";  }
-                    # sample: lambda{|args| args[:settings][:before] = "<i class='fa fa-home'></i>" if args[:level] == 0 && args[:index] == 0;  }
-                before:           '', # content before link text
-                after:            '', # content after link text
-                link_current:     'current-link', # class for current menu link
-                link_before:      '', # content before link
-                link_after:       '', # content after link
-                link_class:       'menu_link', # class for all menu links
-                link_class_parent:"dropdown-toggle", # class for all menu links that contain sub items
-                levels:            -1, # max of levels to recover, -1 => return all levels
-                container_prepend:      '', # content prepend for menu container
-                container_append:       ''  # content append for menu container
-                }
+        menu_slug:        'main_menu', #slug for the menu
+        container:        'ul', #type of container for the menu
+        container_id:     '', #container id for the menu
+        container_class:  'nav navbar-nav nav-menu', #container class for the menu
+        item_container:   'li', #type of container for the items
+        item_current:     'current-menu-item', #class for current menu item
+        item_class:       'menu-item', # class for all menu items
+        item_class_parent:"dropdown", # class for all menu items that contain sub items
+        sub_container:    'ul', #type of container for sub items
+        sub_class:        'dropdown-menu', # class for sub container
+        callback_item:    lambda{|args| },
+        # callback executed for each item (args = { menu_item, link, level, settings, has_children, link_attrs = "", index}).
+        #     menu_item: (Object) Menu object
+        #     link: (Hash) link data: {link: '', name: ''}
+        #     level: (Integer) current level
+        #     has_children: (boolean) if this item contain sub menus
+        #     settings: (Hash) menu settings
+        #     index: (Integer) Index Position of this menu
+        #     link_attrs: (String) Here you can add your custom attrs for current link, sample: id='my_id' data-title='#{args[:link][:name]}'
+        #     item_container_attrs: (String) Here you can add your custom attrs for link container.
+        # In settings you can change the values for this item, like after, before, ..:
+        # sample: lambda{|args| args[:settings][:after] = "<span class='caret'></span>" if args[:has_children]; args[:link_attrs] = "id='#{menu_item.id}'";  }
+        # sample: lambda{|args| args[:settings][:before] = "<i class='fa fa-home'></i>" if args[:level] == 0 && args[:index] == 0;  }
+        before:           '', # content before link text
+        after:            '', # content after link text
+        link_current:     'current-link', # class for current menu link
+        link_before:      '', # content before link
+        link_after:       '', # content after link
+        link_class:       'menu_link', # class for all menu links
+        link_class_parent:"dropdown-toggle", # class for all menu links that contain sub items
+        levels:            -1, # max of levels to recover, -1 => return all levels
+        container_prepend:      '', # content prepend for menu container
+        container_append:       '',  # content append for menu container
+        show_home_button: false # wheather to show a home button
+    }
 
     args = args_def.merge(args)
     nav_menu = current_site.nav_menus.find_by_slug(args[:menu_slug])
     nav_menu = current_site.nav_menus.first unless nav_menu.present?
     html = "<#{args[:container]} class='#{args[:container_class]}' id='#{args[:container_id]}'>#{args[:container_prepend]}{__}#{args[:container_append]}</#{args[:container]}>"
     if nav_menu.present?
-      html = html.sub("{__}", cama_menu_draw_items(args, nav_menu.children.reorder(:term_order)))
+      if args[:show_home_button]
+        home_button = "<li class='home'><a href=''><i class='fa fa-home'></i></a></li>"
+        html = html.sub("{__}", home_button + cama_menu_draw_items(args, nav_menu.children.reorder(:term_order)))
+      else
+        html = html.sub("{__}", cama_menu_draw_items(args, nav_menu.children.reorder(:term_order)))
+      end
     else
       html = html.sub("{__}", "")
     end
@@ -70,14 +76,14 @@ module CamaleonCms::Frontend::NavMenuHelper
       _is_current = data_nav_item[:current] || site_current_path == data_nav_item[:link] || site_current_path == data_nav_item[:link].sub(".html", "")
       has_children = nav_menu_item.have_children? && (args[:levels] == -1 || (args[:levels] != -1 && level <= args[:levels]))
       r = {
-        menu_item: nav_menu_item.decorate,
-        link: data_nav_item,
-        level: level,
-        settings: _args,
-        has_children: has_children,
-        link_attrs: '',
-        item_container_attrs: '',
-        index: index
+          menu_item: nav_menu_item.decorate,
+          link: data_nav_item,
+          level: level,
+          settings: _args,
+          has_children: has_children,
+          link_attrs: '',
+          item_container_attrs: '',
+          index: index
       }
       args[:callback_item].call(r)
       _args = r[:settings]
@@ -91,7 +97,7 @@ module CamaleonCms::Frontend::NavMenuHelper
 
       html += "<#{_args[:item_container]} #{r[:item_container_attrs]} class='#{_args[:item_class]} #{_args[:item_class_parent] if has_children} #{"#{_args[:item_current]}" if _is_current} #{"current-menu-ancestor" if current_children }'>#{_args[:link_before]}
                 <a #{r[:link_attrs]} #{" target='#{nav_menu_item.target}'" if nav_menu_item.target.present?} href='#{data_nav_item[:link]}' class='#{args[:link_current] if _is_current} #{_args[:link_class_parent] if has_children} #{_args[:link_class]}' #{"data-toggle='dropdown'" if has_children } >#{_args[:before]}#{data_nav_item[:name]}#{_args[:after]}</a> #{_args[:link_after]}
-                #{ html_children }
+      #{ html_children }
               </#{_args[:item_container]}>"
       index += 1
     end
