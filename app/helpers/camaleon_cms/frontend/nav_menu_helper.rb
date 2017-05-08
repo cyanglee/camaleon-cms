@@ -53,7 +53,7 @@ module CamaleonCms::Frontend::NavMenuHelper
     html = "<#{args[:container]} class='#{args[:container_class]}' id='#{args[:container_id]}'>#{args[:container_prepend]}{__}#{args[:container_append]}</#{args[:container]}>"
     if nav_menu.present?
       if args[:show_home_button]
-        home_button = "<li class='home'><a href='/'><i lang= '' class='fa fa-home'></i></a></li>"
+        home_button = "<li class='home'><a href='/#{I18n.locale.to_s}?cama_set_language=#{I18n.locale.to_s}'><i lang= '' class='fa fa-home'></i></a></li>"
         html = html.sub("{__}", home_button + cama_menu_draw_items(args, nav_menu.children.reorder(:term_order)))
       else
         html = html.sub("{__}", cama_menu_draw_items(args, nav_menu.children.reorder(:term_order)))
