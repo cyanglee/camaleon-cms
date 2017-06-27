@@ -81,8 +81,8 @@ module CamaleonCms::Frontend::NavMenuHelper
           level: level,
           settings: _args,
           has_children: has_children,
-          link_attrs: '',
-          item_container_attrs: '',
+          link_attrs: args[:link_attrs],
+          item_container_attrs: args[:item_container_attrs],
           index: index
       }
       args[:callback_item].call(r)
