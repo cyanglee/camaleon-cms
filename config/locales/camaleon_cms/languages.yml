@@ -24,7 +24,7 @@ en:
     it: "Italian"
     ru: "Russian"
     nl: "Dutch"
-    ja: "日本語"    
+    ja: "日本語"
     zh-TW: "中文"
 
 es:
@@ -106,7 +106,7 @@ pt-BR:
     nl: "Holandês"
 
 zh-CN:
-  languages: 
+  languages:
     es: "西班牙语"
     en: "英语"
     fr: "法语"
@@ -119,9 +119,9 @@ zh-CN:
     nl: "荷兰语"
 
 zh-TW:
-  languages: 
+  languages:
     es: "西班牙語"
-    en: "英語"
+    en: "English"
     fr: "法語"
     zh-CN: "中文"
     de: "德語"
@@ -130,9 +130,10 @@ zh-TW:
     it: "義大利語"
     ru: "俄語"
     nl: "荷蘭語"
+    ja: "日本語"
 
 ja:
   languages:
     en: "English"
-    ja: "日本語"    
+    ja: "日本語"
     zh-TW: "中文"
