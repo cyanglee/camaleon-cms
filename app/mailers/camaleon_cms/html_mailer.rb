@@ -30,13 +30,13 @@ class CamaleonCms::HtmlMailer < ActionMailer::Base
     if @current_site.get_option("mailer_enabled") == 1
       mail_data[:delivery_method] = :smtp
       mail_data[:delivery_method_options] = {
-        user_name: @current_site.get_option("email_username"),
-        password: @current_site.get_option("email_pass"),
+        # user_name: @current_site.get_option("email_username"),
+        # password: @current_site.get_option("email_pass"),
         address: @current_site.get_option("email_server"),
         port: @current_site.get_option("email_port"),
         domain: (@current_site.the_url.to_s.parse_domain rescue "localhost"),
-        authentication: "plain",
-        enable_starttls_auto: false,
+        # authentication: "plain",
+        enable_starttls_auto: false
       }
     end
     mail_data[:cc] = data[:cc_to].clean_empty.join(",") if data[:cc_to].present?
