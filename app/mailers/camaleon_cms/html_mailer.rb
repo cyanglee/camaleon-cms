@@ -36,7 +36,7 @@ class CamaleonCms::HtmlMailer < ActionMailer::Base
         port: @current_site.get_option("email_port"),
         domain: (@current_site.the_url.to_s.parse_domain rescue "localhost"),
         authentication: "plain",
-        enable_starttls_auto: true,
+        enable_starttls_auto: false,
       }
     end
     mail_data[:cc] = data[:cc_to].clean_empty.join(",") if data[:cc_to].present?
