@@ -32,11 +32,11 @@
         </div>
         <div class="form-group">
             <%= label_tag t('camaleon_cms.admin.settings.email_username') %> (*)<br>
-            <%= text_field :options, :email_username, :class => "form-control required", value: @site.get_option("email_username"), placeholder: 'myuser@gmail.com' %>
+            <%= text_field :options, :email_username, :class => "form-control", value: @site.get_option("email_username"), placeholder: 'myuser@gmail.com' %>
         </div>
         <div class="form-group">
             <%= label_tag t('camaleon_cms.admin.settings.email_pass') %> (*)<br>
-            <%= text_field :options, :email_pass, :class => "form-control required", value: @site.get_option("email_pass"), placeholder: 'mypassword' %>
+            <%= text_field :options, :email_pass, :class => "form-control", value: @site.get_option("email_pass"), placeholder: 'mypassword' %>
         </div>
     </div>
 </div>
