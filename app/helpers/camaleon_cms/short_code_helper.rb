@@ -45,7 +45,7 @@ module CamaleonCms::ShortCodeHelper
                     key: (String) Post slug
                     field: (String) Custom field key, you can add render_field='true' to render field as html element, also you can add index=2 to indicate the value in position 2 for multitple values
                     attrs: (String) attribute name
-                            post: title | created_at | excerpt | url | link | thumb | updated_at | author_name | author_url
+                            post: title | created_at | excerpt | url | link | thumb | updated_at | author_name | author_url | content
                             posttype: title | created_at | excerpt | url | link | thumb | updated_at
                             category: title | created_at | excerpt | url | link | thumb | updated_at
                             posttag: title | created_at | excerpt | url | link | thumb | updated_at
@@ -194,7 +194,7 @@ module CamaleonCms::ShortCodeHelper
     if attrs["field"].present? # model custom fields
       field = model.get_field_object(attrs["field"])
       if attrs["render_field"].present?
-        return render :file => "custom_fields/#{field.options["field_key"]}", :locals => {object: model, field: field, field_key: attrs["field"], attibutes: attrs}
+        return render_to_string(template: "custom_fields/#{field.options["field_key"]}", layout: false, :locals => {object: model, field: field, field_key: attrs["field"], attibutes: attrs}) 
       else
         if attrs["index"]
           res = model.the_fields(attrs["field"])[attrs["index"].to_i-1] rescue ""

@@ -210,7 +210,7 @@ class PluginRoutes
   end
 
   def self.cache_variable(var_name, value=nil)
-    @@_vars.push(var_name).uniq
+    @@_vars.push(var_name).uniq!
     #if Rails.env != "development" # disable cache plugin routes for develoment mode
       cache = class_variable_get("@@cache_#{var_name}") rescue nil
       return cache if value.nil?
@@ -368,7 +368,17 @@ class PluginRoutes
   rescue
     Gem.available?(name)
   end
+  
+  # return the default url options for Camaleon CMS
+  def self.default_url_options
+    {host: (CamaleonCms::Site.main_site.slug rescue "")}
+  end
+  
+  def self.migration_class
+    isRails4? ? ActiveRecord::Migration : ActiveRecord::Migration[4.2]
+  end
 end
+CamaManager = PluginRoutes
 
 #********* fix missing helper method for breadcrumb on rails gem **********#
 if PluginRoutes.isRails5?

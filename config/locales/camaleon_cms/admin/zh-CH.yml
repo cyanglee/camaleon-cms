@@ -5,7 +5,7 @@ zh-CN:
     page_not_exist: "<h1>此页面不存在 :(...</h1><h5>您访问的页面不存在.</h5>"
     page_error_500: "<h1>ooops...</h1><h5>内部服务器500错误。 请联系管理员。</h5>"
     admin:
-      request_error_message: "发生错误,请联系管理员。"
+      request_error_message: "发生错误，请联系管理员。"
       authorization_error: "你没有授权。"
       header:
         member_since: "成员开始日期： %{time}"
@@ -77,9 +77,9 @@ zh-CN:
           approved: '批准'
           change_status: '该评论状态已经被修改 '
           created: '评论已经被创建.'
-          destroy: '回复经被删除.'
+          destroy: '回复已经被删除.'
           destroy_comments: '评论已经被删除.'
-          deleted: '回复经被删除.'
+          deleted: '回复已经被删除.'
           error: '没发现该评论'
           pending: '处理中'
           responses: '回复已经被创建.'
@@ -113,14 +113,23 @@ zh-CN:
           image_versions_descr: "创建上传图片的附加多个版本，示例：300x300,505x350 ==>将创建两个具有这些尺寸的额外图片"
           image_thumb: '缩略图'
           image_thumb_descr: "定义缩略图的尺寸，示例：100x100。 默认值：％{d}"
+          required_image_thumb: '必须有缩略图？'
           numeric: '数字'
           phone: '号码'
           users: '用户'
           posts: '文章'
+          video: '视频'
+          audio: '音频'
+          editor: '编辑器'
+          radio: '单选按钮'
+          checkbox: '复选框'
+          checkboxes: '多选复选框'
+          url: '链接'
+          private_file: '私有文件'
           select_eval: '选择评估'
           field_attrs: '字段属性'
           website: '网站'
-          multiple_choice: '单选按钮'
+          multiple_choice: '多选按钮'
 
 
       login:
@@ -145,7 +154,7 @@ zh-CN:
           invalid_caption: '验证码错误'
           email_not_validated: '邮箱未被激活.'
           confirm_email_token_incorrect: '激活链接错误'
-          confirm_email_token_expired: '激活链接已过去'
+          confirm_email_token_expired: '激活链接已失效'
           confirm_email_success: '账户成功激活!'
         personal_info: '个人信息'
         please_login: '请登录'
@@ -179,9 +188,10 @@ zh-CN:
         home: "主页"
         info: "信息"
         external: "上传从URL"
-        folder_name: '文件夾名稱'
-        reload: '重新加載'
-        clear_cache: '清除緩存'
+        folder_name: '文件夹名称'
+        folder_file_name: '文件夹或文件名'
+        reload: '重新加载'
+        clear_cache: '清除缓存'
       menus:
         link_url: '链接网址'
         target: '目标'
@@ -205,12 +215,12 @@ zh-CN:
         data_found_list: '没有数据列表中找到'
         delete: '确定删除该记录?'
         delete_item: '真的要删除吗?'
-        edit_menu: '选中您要操作的地方。点击铅笔的图标编辑条目,单击图标的形式x删除条目.'
+        edit_menu: '选中您要操作的地方。点击铅笔的图标编辑条目，单击图标的形式x删除条目。'
         add_menus: '从左列添加菜单项.'
-        press_no_continue_work_press_yes_logout: '如果不需要继续操作,请按登出按钮.'
+        press_no_continue_work_press_yes_logout: '如果不需要继续操作，请按登出按钮。'
         updated_success: '更新成功'
         remove_items_submenu: '真的删除此项目及其子菜单项？'
-        you_must_upload_image: '必须上传图片格式'
+        you_must_upload_image: '必须上传图片'
         you_must_upload_video: '必须上传视频'
         so_their_data_has_not_been_saved: '数据还未保存'
         no_response_fields: '无响应字段'
@@ -222,7 +232,7 @@ zh-CN:
         was_removed: '被移除.'
         processing: '处理中...'
         change_photo: '使用下面的形式上传文件。只允许图像文件。'
-        change_password: '修改你的密码先输入旧密码,然后输入新密码和重复新密码.'
+        change_password: '修改你的密码先输入旧密码，然后输入新密码和重复新密码。'
         you_must_upload_json_file: '你必须上传一个json文件'
         import_process: '导入中'
         unauthorized: "拒绝访问"
@@ -237,7 +247,7 @@ zh-CN:
         edit: '编辑'
         add: '添加'
         list: '列表'
-        list_of: '的列表'
+        list_of: '%{post_type}的列表'
         new_site: '新建站点'
         edit_site: '编辑站点'
         update: '更新'
@@ -247,6 +257,7 @@ zh-CN:
         clone_content: '复制内容'
         label_required: '必填标签'
         placeholder_required: '必填占位符'
+        is_featured: '推荐文章'
         message:
           created: '%{post_type} 已经被创建.'
           updated: '%{post_type} 已经被更新.'
@@ -265,7 +276,7 @@ zh-CN:
         add: '添加'
         add_category: '添加类别'
         add_post_type: '添加文章类型'
-        add_new: '添加新闻'
+        add_new: '添加%{type_title}'
         add_post_tag: '添加文章标签'
         categories: '种类'
         category: '种类'
@@ -281,6 +292,7 @@ zh-CN:
         default_layout: '默认布局'
         default_template: '默认模板'
         icon: '图标'
+        icons_url_desc: '请输入这个网址里面的任意图标名称: '
         message:
           error: '错误类'
           error_term: '错误项'
@@ -303,11 +315,12 @@ zh-CN:
         layout: '布局'
         trash: '回收站'
         tooltip:
+          permission_to_support_parent_structure: '允许文章显示父页面'
           permission_asing_categories: '选择种类权限'
           permission_add_tags: '添加标签权限'
           permission_add_content: '允许添加内容'
           permission_add_content_summary: '允许添加内容总结'
-          permission_reviews: '启用该选项以指示是否可以注释帖子内容'
+          permission_reviews: '启用该选项以指示是否可以评论帖子内容'
           permission_add_image_presentation: '允许编辑图片'
           permission_manage_template: '允许选择模板。 （template：将用于呈现内容的文件）'
           permission_manage_layout: '允许选择字段在内容中布局。 （布局：文件包装器将在其中呈现模板）'
@@ -325,6 +338,8 @@ zh-CN:
         type_contents: '种类内容'
         upgrade_to: "升级到"
       settings:
+        comment_anonymous: '允许匿名评论？'
+        custom_fields_show_shortcodes: '显示自定义字段的短代码？'
         activate_create_account: '激活该账户'
         activate_login_social_networks: '允许登录'
         add_field_group: '添加字段组'
@@ -363,12 +378,18 @@ zh-CN:
         seo_setting: "SEO 设置"
         email_settings: "邮件设置 (SMTP)"
         filesystem_type: "文件系统"
+        media_settings: "媒体设置"
+        filesystem_settings: "文件系统设置"
         filesystem_s3_access_key: "AWS S3 Access Key"
         filesystem_s3_secret_key: "AWS S3 Secret Key"
         filesystem_s3_bucket_name: "AWS S3 Bucket name"
         filesystem_s3_endpoint: "AWS S3 Bucket endpoint"
+        filesystem_max_file_size: "最大接受文件[MB]"
+        filesystem_thumb_size: "缩略图尺寸[100x100]"
+        file_actions_in_modals: "在 modal 里显示所有文件"
+        aws: '将文件保存到 AWS S3'
         send_test_email: '发送测试邮件'
-        filesystem_region: "AWS S3 Region"
+        filesystem_region: "AWS S3 区域"
         filesystem_cdn: "CDN url"
         security:
           captcha_user_register: "支持用户注册验证码?"
@@ -448,6 +469,8 @@ zh-CN:
         basic: '基础'
         categories: '分类'
         updated_at: "更新于"
+        permit_is_featured: '允许推荐文章'
+        manage_parent_structure: '管理页面层级'
         comments: '评论'
         count: '统计'
         date_published: '发布日期'
@@ -563,21 +586,24 @@ zh-CN:
         edit_profile: '编辑 资料'
         list_users: '用户列表'
         list_user_roles: '用户角色'
+        post_types: '文章类型'
         message:
-         error: '未发现用户.'
-         error_captcha: 'Oh! 验证码错误!'
-         created: '用户已经被创建.'
-         updated: '用户已经被更新.'
-         deleted: '用户已经被删除'
-         incorrect_old_password: '旧密码不正确'
-         rol_error: '未发现组用户.'
-         rol_created: '用户r角色已经被创建.'
-         rol_updated: '用户r角色已经被更新.'
-         rol_deleted: '用户r角色已经被删除'
-         requires_different_name: '需要不同的名字'
-         requires_different_username: '需要不同的用户名'
-         requires_different_email: '需要不同的邮箱'
-         created_pending_validate_email: "用户已经被创建, 请进入邮箱确认"
+          error: '未发现用户.'
+          error_captcha: 'Oh! 验证码错误!'
+          created: '用户已经被创建.'
+          updated: '用户已经被更新.'
+          deleted: '用户已经被删除'
+          incorrect_old_password: '旧密码不正确'
+          rol_error: '未发现组用户.'
+          rol_created: '用户r角色已经被创建.'
+          rol_updated: '用户r角色已经被更新.'
+          rol_deleted: '用户r角色已经被删除'
+          requires_different_name: '需要不同的名字'
+          requires_different_username: '需要不同的用户名'
+          requires_different_email: '需要不同的邮箱'
+          created_pending_validate_email: "用户已经被创建, 请进入邮箱确认"
+          role_can_not_be_deleted: '无法删除此角色'
+          user_can_not_delete_own_account: '用户不能删除自己的帐户'
         new_photo: '新建照片'
         others_permissions: '其他权限'
         profile: '资料'

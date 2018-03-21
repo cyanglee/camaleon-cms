@@ -29,23 +29,26 @@ class CamaleonCms::Admin::PostsController < CamaleonCms::AdminController
       params[:q] = (params[:q] || '').downcase
       posts_all = posts_all.where("LOWER(#{CamaleonCms::Post.table_name}.title) LIKE ?", "%#{params[:q]}%")
     end
-
+    
+    posts_all = posts_all.where(user_id: cama_current_user) if cannot?(:edit_other, @post_type) # filter only own contents 
+    
     @posts = posts_all
     params[:s] = 'published' unless params[:s].present?
     @lists_tab = params[:s]
-    add_breadcrumb I18n.t("camaleon_cms.admin.post_type.#{params[:s]}") if params[:s].present?
     case params[:s]
-      when "published", "pending", "draft", "trash"
-        @posts = @posts.where(status:  params[:s])
-
+      when "published", "pending", "trash"
+        @posts = @posts.send(params[:s])
+      when "draft"
+        @posts = @posts.drafts
       when "all"
         @posts = @posts.no_trash
     end
 
-    @btns = {published: "#{t('camaleon_cms.admin.post_type.published')} (#{posts_all.where(status: "published").size})", all: "#{t('camaleon_cms.admin.post_type.all')} (#{posts_all.no_trash.size})", pending: "#{t('camaleon_cms.admin.post_type.pending')} (#{posts_all.where(status: "pending").size})", draft: "#{t('camaleon_cms.admin.post_type.draft')} (#{posts_all.where(status: "draft").size})", trash: "#{t('camaleon_cms.admin.post_type.trash')} (#{posts_all.where(status: "trash").size})"}
+    @btns = {published: "#{t('camaleon_cms.admin.post_type.published')} (#{posts_all.published.size})", all: "#{t('camaleon_cms.admin.post_type.all')} (#{posts_all.no_trash.size})", pending: "#{t('camaleon_cms.admin.post_type.pending')} (#{posts_all.pending.size})", draft: "#{t('camaleon_cms.admin.post_type.draft')} (#{posts_all.drafts.size})", trash: "#{t('camaleon_cms.admin.post_type.trash')} (#{posts_all.trash.size})"}
+    per_page = 9999999 if @post_type.manage_hierarchy?
     r = {posts: @posts, post_type: @post_type, btns: @btns, all_posts: posts_all, render: 'index', per_page: per_page }
     hooks_run("list_post", r)
-    per_page = 9999999 if @post_type.manage_hierarchy?
+    add_breadcrumb "#{@btns[params[:s].to_sym]}" if params[:s].present?
     @posts = r[:posts].paginate(:page => params[:page], :per_page => r[:per_page])
     render r[:render]
   end
@@ -91,13 +94,24 @@ class CamaleonCms::Admin::PostsController < CamaleonCms::AdminController
   end
 
   def update
-    @post = @post.parent if @post.draft? && @post.parent.present?
-    authorize! :update, @post
-    @post.drafts.destroy_all
     post_data = get_post_data
+    delete_drafts = false
+    if @post.draft_child? && @post.parent.present?
+      # This is a draft (as a child of the original post)
+      original_parent = @post.parent.parent
+      post_data[:post_parent] = original_parent.present? ? original_parent.id : nil
+      @post = @post.parent
+      delete_drafts = true
+    elsif @post.draft?
+      # This is a normal draft (post whose status was set to 'draft')
+      @post.status = 'published' if post_data[:status].blank?
+    end
+    authorize! :update, @post
     r = {post: @post, post_type: @post_type}; hooks_run("update_post", r)
     @post = r[:post]
     if @post.update(post_data)
+      # delete drafts only on successful update operation
+      @post.drafts.destroy_all if delete_drafts
       @post.set_metas(params[:meta])
       @post.set_field_values(params[:field_options])
       @post.set_options(params[:options])
@@ -116,6 +130,7 @@ class CamaleonCms::Admin::PostsController < CamaleonCms::AdminController
     # @post.children.destroy_all unless @post.draft? TODO: why delete children?
     @post.update_column('status', 'trash')
     @post.update_extra_data
+    hooks_run("trashed_post", {post: @post, post_type: @post_type})
     flash[:notice] = t('camaleon_cms.admin.post.message.trash', post_type: @post_type.decorate.the_title)
     redirect_to action: :index, s: params[:s]
   end
@@ -125,6 +140,7 @@ class CamaleonCms::Admin::PostsController < CamaleonCms::AdminController
     authorize! :update, @post
     @post.update_column('status', @post.options[:status_default] || 'pending')
     @post.update_extra_data
+    hooks_run("restored_post", {post: @post, post_type: @post_type})
     flash[:notice] = t('camaleon_cms.admin.post.message.restore', post_type: @post_type.decorate.the_title)
     redirect_to action: :index, s: params[:s]
   end
@@ -142,7 +158,7 @@ class CamaleonCms::Admin::PostsController < CamaleonCms::AdminController
         flash[:error] = @post.errors.full_messages.join(', ')
       end
     end
-    redirect_to (:back || url_for(action: :index, s: params[:s]))
+    redirect_to(request.referer || url_for(action: :index, s: params[:s]))
   end
 
   # ajax options
@@ -184,7 +200,7 @@ class CamaleonCms::Admin::PostsController < CamaleonCms::AdminController
   def get_post_data(is_create = false)
     post_data = params.require(:post).permit!
     post_data[:user_id] = cama_current_user.id if is_create
-    post_data[:status] == 'pending' if post_data[:status] == 'published' && cannot?(:publish_post, @post_type)
+    post_data[:status] = 'pending' if post_data[:status] == 'published' && cannot?(:publish_post, @post_type)
     post_data[:data_tags] = params[:tags].to_s
     post_data[:data_categories] = params[:categories] || []
     post_data

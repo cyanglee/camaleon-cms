@@ -19,7 +19,7 @@ class CamaleonCms::Admin::MediaController < CamaleonCms::AdminController
     crop_path = cama_crop_image(path_image, params[:ic_w], params[:ic_h], params[:ic_x], params[:ic_y])
     res = upload_file(crop_path, {remove_source: true})
     CamaleonCms::User.find(params[:saved_avatar]).set_meta('avatar', res["url"]) if params[:saved_avatar].present? # save current crop image as avatar
-    render text: res["url"]
+    render html: res["url"].html_safe
   end
 
   # download private files
@@ -55,6 +55,7 @@ class CamaleonCms::Admin::MediaController < CamaleonCms::AdminController
     params[:folder] = params[:folder].gsub("//", "/") if params[:folder].present?
     case params[:media_action]
       when "new_folder"
+        params[:folder] = slugify_folder(params[:folder])
         render partial: "render_folder_item", locals: { fname: params[:folder].split("/").last, folder: cama_uploader.add_folder(params[:folder])}
       when "del_folder"
         cama_uploader.delete_folder(params[:folder])
@@ -63,7 +64,8 @@ class CamaleonCms::Admin::MediaController < CamaleonCms::AdminController
         cama_uploader.delete_file(params[:folder].gsub("//", "/"))
         render inline: ""
       when 'crop_url'
-        r = cama_tmp_upload(params[:url], formats: params[:formats], name: params[:name])
+        params[:url] = (params[:url].start_with?('http') ? '' : current_site.the_url(locale: nil)) + params[:url]
+        r = cama_tmp_upload( params[:url], formats: params[:formats], name: params[:name])
         unless r[:error].present?
           params[:file_upload] = r[:file_path]
           sett = {remove_source: true}

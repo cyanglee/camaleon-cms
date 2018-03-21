@@ -13,7 +13,7 @@ module Plugins::Attack::AttackHelper
   def attack_on_active(plugin)
     current_site.set_meta("attack_config", {get: {sec: 20, max: 10},
                                             post: {sec: 20, max: 5},
-                                            msg: "#{t('plugin.attack.form.request_limit_exceeded')}",
+                                            msg: "#{I18n.t('plugin.attack.form.request_limit_exceeded')}",
                                             ban: 5,
                                             cleared: Time.now
                                           })
@@ -40,7 +40,7 @@ module Plugins::Attack::AttackHelper
   def attack_app_before_load()
     cache_ban = Rails.cache.read(cama_get_session_id)
     if cache_ban.present? # render banned message if it was banned
-      render text: cache_ban, layout: false
+      render html: cache_ban.html_safe, layout: false
       return
     end
 
@@ -50,6 +50,7 @@ module Plugins::Attack::AttackHelper
 
   private
   def attack_check_request
+    return unless current_site
     config = current_site.get_meta("attack_config")
     q = current_site.attack.where(browser_key: cama_get_session_id, path: attack_request_key)
     return unless config.present?
@@ -67,7 +68,7 @@ module Plugins::Attack::AttackHelper
       if r.count > config[:post][:max].to_i
         Rails.cache.write(cama_get_session_id, config[:msg], expires_in: config[:ban].to_i.minutes)
         # send an email to administrator with request info (ip, browser, if logged then send user info
-        render text: config[:msg]
+        render html: config[:msg].html_safe
         return
       end
 
@@ -76,7 +77,7 @@ module Plugins::Attack::AttackHelper
       r = q.where(created_at: config[:get][:sec].to_i.seconds.ago..Time.now)
       if r.count > config[:get][:max].to_i
         Rails.cache.write(cama_get_session_id, config[:msg], expires_in: config[:ban].to_i.minutes)
-        render text: config[:msg]
+        render html: config[:msg].html_safe
         return
       end
     end

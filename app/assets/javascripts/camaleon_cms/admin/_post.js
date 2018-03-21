@@ -56,7 +56,7 @@ function cama_init_post(obj) {
     window["post_editor_draft_intrval"] = setInterval(function () { if($form.length == 0){ clearInterval(window["post_editor_draft_intrval"]); } else{ App_post.save_draft_ajax(null, true); } }, 1 * 60 * 1000);
     window.save_draft = App_post.save_draft_ajax;
 
-    if($form.find(".title-post" + class_translate).size() == 0) class_translate = '';
+    if($form.find(".title-post" + class_translate).length == 0) class_translate = '';
     $form.find(".title-post" + class_translate).each(function () {
         var $this = $(this);
         if (!$this.hasClass('sluged')) {
@@ -110,6 +110,10 @@ function cama_init_post(obj) {
             var slug_tmp = null;
             $input_slug.slugify($this, {
                     change: function (slug) {
+                        if (slug == "") {
+                            // generate 5-length random character slug when slugify result is empty
+                            slug = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+                        }
                         slug_tmp = slug;
                         set_slug(slug);
                     }
@@ -260,7 +264,7 @@ function cama_init_post(obj) {
             });
         }, on_close: function(modal){
             var panel_cats = $form.find("#post_right_bar .list-categories");
-            $.get($form.find("#post_add_new_category").data('reload-url'), {categories: panel_cats.find("input:checkbox:checked").map(function(i, el){ return $(this).val(); }).get()}, function(res){ panel_cats.html(res); });
+            $.get($form.find("#post_add_new_category").data('reload-url'), {categories: panel_cats.find("input[name='categories[]']:checked").map(function(i, el){ return $(this).val(); }).get()}, function(res){ panel_cats.html(res); });
         }});
         /*********** end *************/
     }
