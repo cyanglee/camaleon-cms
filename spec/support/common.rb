@@ -35,7 +35,7 @@ def admin_sign_in(close = false, user = "admin", pass = "admin123")
   end
   click_button 'Log In'
   expect(page).to have_content 'Welcome'
-  wait(1)
+  wait(2)
   page.execute_script("$('#introjs_skipbutton').click()")
 end
 
@@ -108,6 +108,11 @@ end
 # create a new post type for first site
 def create_test_post_type(args = {})
   get_current_test_site.post_types.create!({name: 'Test', slug: 'test', description: 'this is a test', data_options: {}}.merge(args))
+end
+
+# create a new post for post type
+def create_test_post(post_type, args = {})
+  post_type.posts.create!({title: 'Test post', slug: 'test', content: 'this is a test', data_options: {}}.merge(args))
 end
 
 # create a test site

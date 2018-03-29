@@ -43,7 +43,7 @@
                         <option class="" value="published" <%= (@post[:status] == "published") ? "selected": "" %> ><%= t('camaleon_cms.admin.post_type.published')%></option>
                     <% end  %>
                     <option value="pending" <%= (@post[:status] == "pending") ? "selected": "" %>><%= t('camaleon_cms.admin.table.pending')%></option>
-                    <option value="draft" <%= (@post[:status] == "draft") ? "selected": "" %>><%= t('camaleon_cms.admin.table.draft')%></option>
+                    <option value="draft" <%= (@post[:status] == "draft" || @post[:status] == "draft_child") ? "selected": "" %>><%= t('camaleon_cms.admin.table.draft')%></option>
                 </select>
             </div>
             <!-- templates -->
@@ -96,7 +96,7 @@
             </div>
             <div class="panel-body ">
                 <div class="form-group list-categories">
-                    <%= raw post_type_html_inputs(@post_type, "categories", "categories" , "checkbox" ,params[:categories] || (@post.new_record? ? [] : @post.categories.pluck("#{CamaleonCms::TermTaxonomy.table_name}.id")), "categorychecklist", true )%>
+                    <%= raw post_type_html_inputs(@post_type, "categories", "categories" , @post_type.get_option('has_single_category', false) ? 'radio' : "checkbox" ,params[:categories] || (@post.new_record? ? [] : @post.categories.pluck("#{CamaleonCms::TermTaxonomy.table_name}.id")), "categorychecklist", true )%>
                 </div>
             </div>
         </div>

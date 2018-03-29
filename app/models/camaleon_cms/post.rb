@@ -1,10 +1,13 @@
 class CamaleonCms::PostUniqValidator < ActiveModel::Validator
   def validate(record)
-    if record.status != 'draft'
+    unless record.draft?
       slug_array = record.slug.to_s.translations_array
       ptype = record.post_type
       if ptype.present? # only for posts that belongs to a post type model
-        posts = ptype.site.posts.where("(#{slug_array.map {|s| "#{CamaleonCms::Post.table_name}.slug LIKE '%-->#{s}<!--%'"}.join(" OR ")} ) OR #{CamaleonCms::Post.table_name}.slug = ?",  record.slug).where("#{CamaleonCms::Post.table_name}.status != 'draft'").where.not(id: record.id)
+        posts = ptype.site.posts
+                    .where("(#{slug_array.map {|s| "#{CamaleonCms::Post.table_name}.slug LIKE '%-->#{s}<!--%'"}.join(" OR ")} ) OR #{CamaleonCms::Post.table_name}.slug = ?",  record.slug)
+                    .where("#{CamaleonCms::Post.table_name}.status != 'draft' AND #{CamaleonCms::Post.table_name}.status != 'draft_child'")
+                    .where.not(id: record.id)
         if posts.size > 0
           if slug_array.size > 1
             record.errors[:base] << "#{I18n.t('camaleon_cms.admin.post.message.requires_different_slug')}: #{posts.pluck(:slug).map{|slug| record.slug.to_s.translations.map{|lng, r_slug| "#{r_slug} (#{lng})" if slug.translations_array.include?(r_slug) }.join(",") }.join(",").split(",").uniq.clean_empty.join(", ")} "
@@ -26,7 +29,7 @@ class CamaleonCms::Post < CamaleonCms::PostDefault
   include CamaleonCms::CategoriesTagsForPosts
   alias_attribute :post_type_id, :taxonomy_id
   default_scope ->{ where(post_class: "Post").order(post_order: :asc, created_at: :desc) }
-  has_many :metas, ->{ where(object_class: 'Post')}, :class_name => "CamaleonCms::Meta", foreign_key: :objectid, dependent: :delete_all
+  cama_define_common_relationships('Post')
 
   # DEPRECATED
   has_many :post_relationships, class_name: "CamaleonCms::PostRelationship", foreign_key: :objectid, dependent: :destroy,  inverse_of: :posts
@@ -37,7 +40,7 @@ class CamaleonCms::Post < CamaleonCms::PostDefault
   has_many :categories, class_name: "CamaleonCms::Category", through: :term_relationships, :source => :term_taxonomies
   has_many :post_tags, class_name: "CamaleonCms::PostTag", through: :term_relationships, :source => :term_taxonomies
   has_many :comments, class_name: "CamaleonCms::PostComment", foreign_key: :post_id, dependent: :destroy
-  has_many :drafts, ->{where(status: 'draft')}, class_name: "CamaleonCms::Post", foreign_key: :post_parent, dependent: :destroy
+  has_many :drafts, ->{where(status: 'draft_child')}, class_name: "CamaleonCms::Post", foreign_key: :post_parent, dependent: :destroy
   has_many :children, class_name: "CamaleonCms::Post", foreign_key: :post_parent, dependent: :destroy, primary_key: :id
 
   belongs_to :owner, class_name: PluginRoutes.static_system_info['user_model'].presence || 'CamaleonCms::User', foreign_key: :user_id
@@ -52,8 +55,8 @@ class CamaleonCms::Post < CamaleonCms::PostDefault
   scope :no_trash, -> {where.not(status: 'trash')}
   scope :published, -> {where(status: 'published')}
   scope :root_posts, -> {where(post_parent: [nil, ''])}
-  scope :drafts, -> {where(status: 'draft')}
-  scope :pendings, -> {where(status: 'pending')}
+  scope :drafts, -> {where(status: %w(draft draft_child))}
+  scope :pending, -> {where(status: 'pending')}
   scope :latest, -> {reorder(created_at: :desc)}
 
   validates_with CamaleonCms::PostUniqValidator
@@ -99,7 +102,11 @@ class CamaleonCms::Post < CamaleonCms::PostDefault
 
   # check if this is in draft status
   def draft?
-    status == 'draft'
+    status == 'draft' || status == 'draft_child'
+  end
+
+  def draft_child?
+    status == 'draft_child'
   end
 
   # check if this is in trash status
@@ -252,6 +259,7 @@ class CamaleonCms::Post < CamaleonCms::PostDefault
   private
   # calculate a post order when it is empty
   def fix_post_order
-    self.post_order = (post_type.posts.count) + 1
+    last_post = post_type.posts.where.not(id: nil).last
+    self.post_order = last_post.present? ? last_post.post_order + 1 : 1
   end
 end

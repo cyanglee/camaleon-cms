@@ -3,7 +3,7 @@ class CamaleonCms::Site < CamaleonCms::TermTaxonomy
   attr_accessor :site_domain
   include CamaleonCms::SiteDefaultSettings
   default_scope { where(taxonomy: :site).reorder(term_group: :desc) }
-  has_many :metas, -> { where(object_class: 'Site') }, :class_name => "CamaleonCms::Meta", foreign_key: :objectid, dependent: :delete_all
+  cama_define_common_relationships('Site')
   has_many :post_types, :class_name => "CamaleonCms::PostType", foreign_key: :parent_id, dependent: :destroy
   has_many :nav_menus, :class_name => "CamaleonCms::NavMenu", foreign_key: :parent_id, dependent: :destroy, inverse_of: :site
   has_many :nav_menu_items, :class_name => "CamaleonCms::NavMenuItem", foreign_key: :term_group
@@ -219,7 +219,7 @@ class CamaleonCms::Site < CamaleonCms::TermTaxonomy
   # update all routes of the system
   # reload system routes for this site
   def update_routes
-    PluginRoutes.reload if self.slug_changed?
+    PluginRoutes.reload if cama_attr_changed?(:slug)
   end
 
   def reload_routes

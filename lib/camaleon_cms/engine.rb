@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'bcrypt'
 require 'cancancan'
-require 'draper'
 require 'meta-tags'
 require 'mini_magick'
 # require 'mobu'
@@ -20,9 +19,15 @@ require 'cama_meta_tag'
 $camaleon_engine_dir = File.expand_path("../../../", __FILE__)
 require File.join($camaleon_engine_dir, "lib", "plugin_routes").to_s
 Dir[File.join($camaleon_engine_dir, "lib", "ext", "**", "*.rb")].each{ |f| require f }
+require 'draper' if PluginRoutes.isRails4?
+
 module CamaleonCms
   class Engine < ::Rails::Engine
+    config.generators do |g|
+      g.test_framework :rspec
+    end
     config.before_initialize do |app|
+      app.config.active_record.belongs_to_required_by_default = false if PluginRoutes.isRails5?
       if app.respond_to?(:console)
         app.console do
           # puts "******** Camaleon CMS: ********"
@@ -34,9 +39,10 @@ module CamaleonCms
 
     initializer :append_migrations do |app|
       engine_dir = File.expand_path("../../../", __FILE__)
-      app.config.i18n.load_path += Dir[File.join($camaleon_engine_dir, 'config', 'locales', '**', '*.{rb,yml}')]
+      translation_files = Dir[File.join($camaleon_engine_dir, 'config', 'locales', '**', '*.{rb,yml}')]
+      PluginRoutes.all_apps.each { |info| translation_files += Dir[File.join(info['path'], 'config', 'locales', '*.{rb,yml}')] }
       app.config.i18n.enforce_available_locales = false
-      PluginRoutes.all_apps.each{ |info| app.config.i18n.load_path += Dir[File.join(info["path"], "config", "locales", '*.{rb,yml}')] }
+      app.config.i18n.load_path.unshift(*translation_files)
 
       # assets
       app.config.assets.paths << Rails.root.join("app", "apps")
@@ -55,18 +61,22 @@ module CamaleonCms
 
       # extra configuration for plugins
       app.config.eager_load_paths += %W(#{app.config.root}/app/apps/**/)
-      PluginRoutes.all_plugins.each{ |plugin|
-        app.config.paths["db/migrate"] << File.join(plugin["path"], "migrate") if Dir.exist?(File.join(plugin["path"], "migrate"));
-        app.config.paths["db/migrate"] << File.join(plugin["path"], "db", "migrate") if Dir.exist?(File.join(plugin["path"], "db", "migrate"));
-      }
+      if PluginRoutes.static_system_info['auto_include_migrations']
+        PluginRoutes.all_plugins.each{ |plugin|
+          app.config.paths["db/migrate"] << File.join(plugin["path"], "migrate") if Dir.exist?(File.join(plugin["path"], "migrate"));
+          app.config.paths["db/migrate"] << File.join(plugin["path"], "db", "migrate") if Dir.exist?(File.join(plugin["path"], "db", "migrate"));
+        }
+      end
 
       # Static files
       app.middleware.use ::ActionDispatch::Static, "#{root}/public"
 
       # migrations checking
-      unless app.root.to_s.match root.to_s
-        config.paths["db/migrate"].expanded.each do |expanded_path|
-          app.config.paths["db/migrate"] << expanded_path
+      if PluginRoutes.static_system_info['auto_include_migrations']
+        unless app.root.to_s.match root.to_s
+          config.paths["db/migrate"].expanded.each do |expanded_path|
+            app.config.paths["db/migrate"] << expanded_path
+          end
         end
       end
     end

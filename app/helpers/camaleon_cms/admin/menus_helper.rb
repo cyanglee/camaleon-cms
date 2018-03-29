@@ -9,7 +9,7 @@ module CamaleonCms::Admin::MenusHelper
       pt = pt.decorate
       items_i = []
       items_i << {icon: "list", title: "#{t('camaleon_cms.admin.post_type.all')}", url: cama_admin_post_type_posts_path(pt.id)} if can? :posts, pt
-      items_i << {icon: "plus", title: "#{t('camaleon_cms.admin.post_type.add_new')}  ", url: new_cama_admin_post_type_post_path(pt.id)} if can? :create_post, pt
+      items_i << {icon: "plus", title: "#{t('camaleon_cms.admin.post_type.add_new', type_title: pt.the_title)}", url: new_cama_admin_post_type_post_path(pt.id)} if can? :create_post, pt
       if pt.manage_categories?
         items_i << {icon: "folder-open", title: t('camaleon_cms.admin.post_type.categories'), url: cama_admin_post_type_categories_path(pt.id)} if can? :categories, pt
       end
@@ -169,8 +169,8 @@ module CamaleonCms::Admin::MenusHelper
   def _admin_menu_draw(items)
     res = []
     res  << "<ul class='treeview-menu'>"
-    items.each do |item|
-      res  << "<li class='#{"xn-openable" if item.has_key?(:items)} #{'active' if is_active_menu(item[:key])}' #{item[:datas]}>
+    items.each_with_index do |item, index|
+      res  << "<li class='#{"xn-openable" if item.has_key?(:items)} item_#{index + 1} #{'active' if is_active_menu(item[:key])}' #{item[:datas]}>
                 <a href='#{item[:url]}'><i class='fa fa-#{item[:icon]}'></i> #{item[:title]} #{'<i class="fa fa-angle-left pull-right"></i>' if item.has_key?(:items) }</a>
                 #{_admin_menu_draw(item[:items]) if item.has_key?(:items)}
               </li>"

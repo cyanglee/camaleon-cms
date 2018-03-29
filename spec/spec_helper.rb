@@ -42,7 +42,7 @@ Capybara::Screenshot.register_filename_prefix_formatter(:rspec) do |example|
   "screenshot_#{example.description.gsub(' ', '-').gsub(/^.*\/spec\//,'')}"
 end
 
-#****** configuration to test using poltergaist *****#
+#****** configuration to test using poltergeist *****#
 require 'capybara/poltergeist'
 # Note: you need phantomjs 1.9.x which can be downloaded from here: https://code.google.com/archive/p/phantomjs/downloads
 if File.exist?(File.join(CAMALEON_CMS_ROOT, 'spec', 'bin', 'phantomjs'))
@@ -67,7 +67,7 @@ RSpec.configure do |config|
     # ...rather than:
     #     # => "be bigger than 2"
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
-    
+
     expectations.syntax = [:should, :expect]
   end
 
@@ -170,6 +170,9 @@ RSpec.configure do |config|
   # The different available types are documented in the features, such as in
   # https://relishapp.com/rspec/rspec-rails/docs
   config.infer_spec_type_from_file_location!
+  config.before :type => :decorator do
+    ApplicationController.new.view_context
+  end
 end
 
 RSpec.configure do |config|

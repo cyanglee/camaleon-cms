@@ -36,40 +36,33 @@
   ```
   rails new my_project
   ```
-* Add the gem in your Gemfile
+* Add the gem in your Gemfile (Stable versions 2.4.4.5, 2.4.3.10, 2.3.6, 2.2.1, 2.1.1)
 
   ```
-  gem "camaleon_cms",  '>= 2.4.3.1' # Stable versions 2.3.6, 2.2.1, 2.1.1, 2.1.0
+  gem "camaleon_cms",  '>= 2.4.5'
   # gem "camaleon_cms", github: 'owen2345/camaleon-cms' # current development version
+  # gem 'draper', '~> 3' # only for Rails 5
+  # verify (gem 'sass-rails', '~> 5.0') only for Rails 5
   ```
-* Only Rails 5 support
-  
-  Add in your Gemfile
-  ```
-  gem 'activemodel-serializers-xml', git: 'https://github.com/rails/activemodel-serializers-xml'
-  gem 'draper', github: 'audionerd/draper', branch: 'rails5'
-  ```
-  Create a file "lib/rails/test_unit/sub_test_task.rb" in your project (draper patch)
-  ```
-  class Rails::SubTestTask < Rake::TestTask
-  end
-  ```
-  
+
 * Install required Gem and dependencies
 
   ```
   bundle install
   ```
-* Install the CMS (before this, you can change defaut configuration in config/system.json)
+* Camaleon CMS Installation
 
   ```
   rails generate camaleon_cms:install
   ```
+* (Optional) Before continue you can configure your cms settings in (my_app/config/system.json), [here](config/system.json) you can see the full settings.  
 * Create database structure
-
   ```
+  rake camaleon_cms:generate_migrations
+  # before run migrations you can customize copied migration files
   rake db:migrate
   ```
+  
 * Start your server
 
   ```
@@ -80,7 +73,7 @@
 
 # Camaleon CMS (It adapts to your needs)
 
-Camaleon CMS is a dynamic and advanced content management system based on Ruby on Rails 4 and Ruby 1.9.3+. This CMS is an alternative to wordpress for Ruby on Rails developers to manage advanced contents easily.
+Camaleon CMS is a dynamic and advanced content management system based on Ruby on Rails 4+ and Ruby 1.9.3+. This CMS is an alternative to wordpress for Ruby on Rails developers to manage advanced contents easily.
 Camaleon CMS is a flexible manager where you can build your custom content structure without coding anything by custom fields and custom contents type.
 
 To download or publish themes go to themes store:
@@ -101,7 +94,7 @@ It was released on July, 2015 and tested previously with more than 20 projects b
 * Extend or customize the functionalities by plugins
 * Manage your content visualization by themes
 * Advanced User roles
-* Integrate into existent rails 4 projects
+* Integrate into existent rails 4+ projects
 * Other features:
   - Shortcodes
   - Widgets
@@ -152,6 +145,9 @@ If you need support, need some extra functionality or need plugins, please conta
 * Site: http://camaleon.tuzitio.com/
 * Email: owenperedo@gmail.com
 * Skype: owen-2345
+* Stack Overflow: Use "camaleon" as tag to ask questions related to this CMS (don't forget to include cms version + rails version).  
+* Guitter: https://gitter.im/camaleoncms/Lobby
+
 
 ## Author
 Owen Peredo Diaz
@@ -170,7 +166,7 @@ http://camaleon.tuzitio.com/license.html
 RAILS_ENV=test bundle exec rake app:db:migrate
 RAILS_ENV=test bundle exec rake app:db:test:prepare
 ```
-* Configure/Install Poltergaist and change your phanthomjs path in spec/spec_helper.rb
+* Configure/Install Poltergeist and change your phanthomjs path in spec/spec_helper.rb
 
 * Run testing
 ```

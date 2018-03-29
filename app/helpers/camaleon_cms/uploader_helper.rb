@@ -58,13 +58,13 @@ module CamaleonCms::UploaderHelper
     end
     # save file
     key = File.join(settings[:folder], settings[:filename]).to_s.cama_fix_slash
-    res = cama_uploader.add_file(uploaded_io, key, {same_name: settings[:same_name]})
+    res = cama_uploader.add_file(settings[:uploaded_io], key, {same_name: settings[:same_name]})
     {} if settings[:temporal_time] > 0 # temporal file upload (always put as local for temporal files) (TODO: use delayjob)
 
     # generate image versions
     if res['format'] == 'image'
       settings[:versions].to_s.gsub(' ', '').split(',').each do |v|
-        version_path = cama_resize_upload(uploaded_io.path, v, {replace: false})
+        version_path = cama_resize_upload(settings[:uploaded_io].path, v, {replace: false})
         cama_uploader.add_file(version_path, cama_uploader.version_path(res['key'], v), is_thumb: true, same_name: true)
         FileUtils.rm_f(version_path)
       end
@@ -74,6 +74,8 @@ module CamaleonCms::UploaderHelper
     cama_uploader_generate_thumbnail(uploaded_io.path, res['key'], settings[:thumb_size]) if settings[:generate_thumb] && res['thumb'].present?
 
     FileUtils.rm_f(uploaded_io.path) if settings[:remove_source]
+
+    hooks_run('after_upload', settings)
     res
   end
 
@@ -208,7 +210,7 @@ module CamaleonCms::UploaderHelper
   #   dimension: 20x30
   # return: {file_path, error}
   def cama_tmp_upload(uploaded_io, args = {})
-    tmp_path = args[:path] || Rails.public_path.join("tmp", current_site.id.to_s)
+    tmp_path = args[:path] || File.join(Rails.public_path, "tmp", current_site.id.to_s).to_s
     FileUtils.mkdir_p(tmp_path) unless Dir.exist?(tmp_path)
     saved = false
     if uploaded_io.is_a?(String) && (uploaded_io.start_with?("data:")) # create tmp file using base64 format
@@ -221,14 +223,14 @@ module CamaleonCms::UploaderHelper
       saved =  true
     elsif uploaded_io.is_a?(String) && (uploaded_io.start_with?("http://") || uploaded_io.start_with?("https://"))
       return {error: "#{ct("file_format_error")} (#{args[:formats]})"} unless cama_uploader.class.validate_file_format(uploaded_io, args[:formats])
-      uploaded_io = Rails.public_path.join(uploaded_io.sub(current_site.the_url(locale: false), '')).to_s if uploaded_io.include?(current_site.the_url(locale: false)) # local file
+      uploaded_io = File.join(Rails.public_path, uploaded_io.sub(current_site.the_url(locale: nil), '')).to_s if uploaded_io.include?(current_site.the_url(locale: nil)) # local file
       _tmp_name = uploaded_io.split("/").last.split('?').first; args[:name] = args[:name] || _tmp_name
       uploaded_io = open(uploaded_io)
     end
     uploaded_io = File.open(uploaded_io) if uploaded_io.is_a?(String)
     return {error: "#{ct("file_format_error")} (#{args[:formats]})"} unless cama_uploader.class.validate_file_format(_tmp_name || uploaded_io.path, args[:formats])
     return {error: "#{ct("file_size_exceeded", default: "File size exceeded")} (#{number_to_human_size(args[:maximum])})"} if args[:maximum].present? && args[:maximum] < (uploaded_io.size rescue File.size(uploaded_io))
-    name = args[:name] || uploaded_io.path.split("/").last; name = "#{File.basename(name, File.extname(name)).underscore}#{File.extname(name)}"
+    name = args[:name] || uploaded_io.try(:original_filename) || uploaded_io.path.split("/").last; name = "#{File.basename(name, File.extname(name)).underscore}#{File.extname(name)}"
     path ||= uploader_verify_name(File.join(tmp_path, name))
     File.open(path, "wb"){|f| f.write(uploaded_io.read) } unless saved
     path = cama_resize_upload(path, args[:dimension]) if args[:dimension].present?
@@ -264,16 +266,29 @@ module CamaleonCms::UploaderHelper
           cloud_front: current_site.get_option("filesystem_s3_cloudfront"),
           aws_file_upload_settings: lambda{|settings| settings }, # permit to add your custom attributes for file_upload http://docs.aws.amazon.com/sdkforruby/api/Aws/S3/Object.html#upload_file-instance_method
           aws_file_read_settings: lambda{|data, s3_file| data } # permit to read custom attributes from aws file and add to file parsed object
-        }
+        },
+        custom_uploader: nil # posibility to use custom file uploader
       }
       hooks_run("on_uploader", args)
+      return args[:custom_uploader] if args[:custom_uploader].present?
+
       case args[:server]
         when 's3', 'aws'
-          CamaleonCmsAwsUploader.new({current_site: current_site, thumb: args[:thumb], aws_settings: args[:aws_settings]})
+          CamaleonCmsAwsUploader.new({current_site: current_site, thumb: args[:thumb], aws_settings: args[:aws_settings]}, self)
         else
-          CamaleonCmsLocalUploader.new({current_site: current_site, thumb: args[:thumb]})
+          CamaleonCmsLocalUploader.new({current_site: current_site, thumb: args[:thumb]}, self)
       end
     }.call
+  end
+
+  def slugify(val)
+    val.to_s.downcase.strip.gsub(' ', '-').gsub(/[^\w-]/, '')
+  end
+
+  def slugify_folder(val)
+    splitted_folder = val.split('/')
+    splitted_folder[-1] = slugify(splitted_folder.last)
+    splitted_folder.join('/')
   end
 
   private
