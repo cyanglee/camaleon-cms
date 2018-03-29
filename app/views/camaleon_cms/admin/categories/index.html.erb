@@ -51,7 +51,7 @@
                def _render_categories(categories, _level = 0)
                  categories.each do |term|
                    _item_html(term, _level)
-                    children = term.children
+                    children = term.children.order('term_order')
                    _render_categories(children, _level + 1) if children.size > 0
                  end
                end
