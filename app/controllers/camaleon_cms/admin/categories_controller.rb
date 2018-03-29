@@ -4,7 +4,7 @@ class CamaleonCms::Admin::CategoriesController < CamaleonCms::AdminController
   before_action :set_category, only: ['show','edit','update','destroy']
 
   def index
-    @categories = @post_type.categories
+    @categories = @post_type.categories.order('term_order')
     @categories = @categories.paginate(:page => params[:page], :per_page => current_site.admin_per_page)
     hooks_run("list_category", {categories: @categories, post_type: @post_type})
   end
