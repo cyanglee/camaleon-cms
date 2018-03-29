@@ -23,6 +23,7 @@
               <th><%= t('camaleon_cms.admin.table.description')%></th>
               <th><%= t('camaleon_cms.admin.table.slug')%></th>
               <th><%= t('camaleon_cms.admin.table.qty')%></th>
+              <th>Order</th>
               <%= r = {html: "", post_type: @post_type}; hooks_run("category_list_header", r); raw(r[:html]); %>
               <th><%= t('camaleon_cms.admin.table.actions')%></th>
             </tr>
@@ -36,6 +37,7 @@
                       <td><%= item.the_content %></td>
                       <td><%= item.the_slug %></td>
                       <td><%= item.count %></td>
+                      <td><%= item.term_order %></td>
                       <%= r = {html: "", post_type: @post_type, category: item}; hooks_run("category_list_body", r); raw(r[:html]); %>
                       <td>
                           <%= link_to raw('<i class="fa fa-eye"></i>'), item.the_url, target: '_blank', class: "btn btn-info btn-xs", title: "#{t('camaleon_cms.common.visit')}" %>
