@@ -2,7 +2,7 @@ class CamaleonCms::Category < CamaleonCms::TermTaxonomy
   alias_attribute :site_id, :term_group
   alias_attribute :post_type_id, :status
 
-  default_scope { where(taxonomy: :category).order('term_order') }
+  default_scope { where(taxonomy: :category).order('cama_term_taxonomy.term_order') }
   scope :no_empty, -> { where('count > 0') } # return all categories that contains at least one post
   scope :empty, -> { where(count: [0, nil]) } # return all categories that does not contain any post
   # scope :parents, -> { where("term_taxonomy.parent_id IS NULL") }
