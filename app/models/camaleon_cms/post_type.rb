@@ -1,6 +1,6 @@
 class CamaleonCms::PostType < CamaleonCms::TermTaxonomy
   alias_attribute :site_id, :parent_id
-  default_scope { where(taxonomy: :post_type) }
+  default_scope { where(taxonomy: :post_type).order('term_order') }
   cama_define_common_relationships('PostType')
   has_many :categories, :class_name => "CamaleonCms::Category", foreign_key: :parent_id, dependent: :destroy, inverse_of: :post_type_parent
   has_many :post_tags, :class_name => "CamaleonCms::PostTag", foreign_key: :parent_id, dependent: :destroy, inverse_of: :post_type
