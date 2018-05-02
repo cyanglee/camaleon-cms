@@ -32,13 +32,14 @@ module CamaleonCms::UploaderHelper
 
     settings = settings.to_sym
     settings[:uploaded_io] = uploaded_io
+    filename = ((cached_name || uploaded_io.original_filename) rescue uploaded_io.path.split("/").last).cama_fix_filename
     settings = {
         folder: "",
         maximum: current_site.get_option('filesystem_max_size', 100).to_f.megabytes,
         formats: "*",
         generate_thumb: true,
         temporal_time: 0,
-        filename: ((cached_name || uploaded_io.original_filename) rescue uploaded_io.path.split("/").last).cama_fix_filename,
+        filename: filename.downcase,
         file_size: File.size(uploaded_io.to_io),
         remove_source: false,
         same_name: false,
