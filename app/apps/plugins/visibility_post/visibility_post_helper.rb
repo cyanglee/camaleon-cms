@@ -1,6 +1,6 @@
 module Plugins::VisibilityPost::VisibilityPostHelper
   def plugin_visibility_post_the_content(args) #{content: object.content.translate(@_deco_locale), post: object}
-    binding.pry
+
     if args[:post].visibility == "password"
       return if params[:post_password].present? && params[:post_password] == args[:post].visibility_value
       args[:content] = _password_form
@@ -8,31 +8,31 @@ module Plugins::VisibilityPost::VisibilityPostHelper
   end
 
   def plugin_visibility_on_active(plugin)
-    binding.pry
+
   end
 
   def plugin_visibility_on_inactive(plugin)
-    binding.pry
+
   end
 
   def plugin_visibility_post_list(args)
-    binding.pry
+
     args[:posts] = args[:posts].where(visibility: "private") if params[:s] == "private"
     args[:btns][:private] = "#{t('camaleon_cms.admin.table.private')} (#{args[:all_posts].where(visibility: "private").size})"
   end
 
   def plugin_visibility_create_post(args)
-    binding.pry
+
     save_visibility(args[:post])
   end
 
   def plugin_visibility_new_post(args)
-    binding.pry
+
     args[:extra_settings] << form_html(args[:post])
   end
 
   def plugin_visibility_can_visit(args)
-    binding.pry
+
     post = args[:post]
     return args[:flag] = false if post.published_at.present? && post.published_at > Time.now
     return if post.visibility != 'private'
@@ -40,7 +40,7 @@ module Plugins::VisibilityPost::VisibilityPostHelper
   end
 
   def plugin_visibility_extra_columns(args)
-    binding.pry
+
     if args[:from_body]
       args[:content] = "<td><i class='fa fa-#{{"private"=>"lock", ""=>"lock", "public"=>"eye", "password"=>"eye-slash"}[args[:post].visibility]}'></i> #{args[:post].visibility}</td>"
       args[:content] = "<td>#{args[:post].published_at.present? ? args[:post].published_at.strftime('%B %e, %Y %H:%M') : args[:post].the_created_at}</td>"
@@ -51,7 +51,7 @@ module Plugins::VisibilityPost::VisibilityPostHelper
   end
 
   def plugin_visibility_filter_post(args)
-    binding.pry
+
     args[:active_record] = args[:active_record].where("(#{CamaleonCms::Post.table_name}.published_at is null or #{CamaleonCms::Post.table_name}.published_at <= ?)", Time.now)
     if signin?
       if ActiveRecord::Base.connection.adapter_name.downcase.include?("mysql")
