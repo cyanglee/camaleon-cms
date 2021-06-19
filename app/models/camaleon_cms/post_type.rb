@@ -13,7 +13,7 @@ class CamaleonCms::PostType < CamaleonCms::TermTaxonomy
   belongs_to :owner, class_name: PluginRoutes.static_system_info['user_model'].presence || 'CamaleonCms::User', foreign_key: :user_id
   belongs_to :site, :class_name => "CamaleonCms::Site", foreign_key: :parent_id
 
-  scope :visible_menu, -> {where(term_group: nil)}
+  scope :visible_menu, -> {where(term_group: nil).order(:term_order)}
   scope :hidden_menu, -> {where(term_group: -1)}
   before_destroy :destroy_field_groups
   after_create :set_default_site_user_roles
